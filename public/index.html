@@ -9,6 +9,11 @@
         <p><input id="cull" type="checkbox" />enable culling</p>
         <p><input id="front" type="checkbox" />frontface (check -&gt; CCW)</p>
         <p><input id="depth" type="checkbox" />enable depth test</p>
+        <p>
+            <input id="transparency" name="blend" type="radio" checked />transparency
+            <input id="add" name="blend" type="radio" />add
+        </p>
+        <p><input id="range" type="range" min="0" max="100" value="70" />vertex alpha value (0% - 100%)</p>
         <script src="bundle.js"></script>
     </body>
 </html>

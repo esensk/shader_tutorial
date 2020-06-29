@@ -72,6 +72,8 @@ const uniLocation = util.UniformLocations(
     gl, program,
     "mvpMatrix",
     "pointSize",
+    "texture",
+    "useTexture",
 )
 
 const mat = new matIV()
@@ -84,9 +86,14 @@ const invMatrix = mat.identity(mat.create())
 
 gl.enable(gl.DEPTH_TEST)
 gl.depthFunc(gl.LEQUAL)
+gl.enable(gl.BLEND)
+gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE)
 
 const pointSizeRange: number[] = gl.getParameter(gl.ALIASED_POINT_SIZE_RANGE)
 console.log("point size range:" + pointSizeRange[0] + " to " + pointSizeRange[1])
+
+let texture0: WebGLTexture = null
+create_texture("../src/texture/texture4.png", 0)
 
 let count: number = 0
 const func = () => {
@@ -100,25 +107,26 @@ const func = () => {
     const qMatrix = mat.identity(mat.create())
     qtn.toMatIV(qt, qMatrix)
 
-    // ビュー×プロジェクション座標変換行列
-    var camPosition = [0.0, 5.0, 10.0];
-    mat.lookAt(camPosition, [0, 0, 0], [0, 1, 0], vMatrix);
-    mat.multiply(vMatrix, qMatrix, vMatrix);
-    mat.perspective(45, canvas.width / canvas.height, 0.1, 100, pMatrix);
-    mat.multiply(pMatrix, vMatrix, tmpMatrix);
+    const camPos = [0.0, 5.0, 10.0]
+    mat.lookAt(camPos, [0, 0, 0], [0, 1, 0], vMatrix)
+    mat.multiply(vMatrix, qMatrix, vMatrix)
+    mat.perspective(45, canvas.width / canvas.height, 0.1, 100, pMatrix)
+    mat.multiply(pMatrix, vMatrix, tmpMatrix)
 
-    // 点のサイズをエレメントから取得
     var size = parseFloat(pointSize.value) / 10;
 
-    // 点を描画
+    gl.activeTexture(gl.TEXTURE0)
+    gl.bindTexture(gl.TEXTURE_2D, texture0)
+
     mat.identity(mMatrix);
     mat.rotate(mMatrix, rad, [0, 1, 0], mMatrix);
     mat.multiply(tmpMatrix, mMatrix, mvpMatrix);
     gl.uniformMatrix4fv(uniLocation[0], false, mvpMatrix);
     gl.uniform1f(uniLocation[1], size);
+    gl.uniform1f(uniLocation[2], 0);
+    gl.uniform1f(uniLocation[3], 1);
     gl.drawArrays(gl.POINTS, 0, sphere.p.length / 3);
 
-    // 線のプリミティブタイプを判別
     let lineOption: number = 0;
     if (lines.checked) {
         lineOption = gl.LINES;
@@ -136,6 +144,7 @@ const func = () => {
     mat.scale(mMatrix, [3.0, 3.0, 1.0], mMatrix);
     mat.multiply(tmpMatrix, mMatrix, mvpMatrix);
     gl.uniformMatrix4fv(uniLocation[0], false, mvpMatrix);
+    gl.uniform1i(uniLocation[3], 0)
     gl.drawArrays(lineOption, 0, position.length / 3);
 
     gl.flush()
@@ -144,3 +153,23 @@ const func = () => {
 }
 
 func()
+
+function create_texture(source: string, number: number) {
+    const img: HTMLImageElement = new Image()
+    img.onload = function () {
+        const tex: WebGLTexture = gl.createTexture()
+        gl.bindTexture(gl.TEXTURE_2D, tex)
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img)
+        gl.generateMipmap(gl.TEXTURE_2D)
+        gl.bindTexture(gl.TEXTURE2, null)
+
+        switch (number) {
+            case 0:
+                texture0 = tex
+                break;
+            default:
+                break;
+        }
+    }
+    img.src = source
+}

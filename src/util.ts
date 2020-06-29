@@ -152,7 +152,7 @@ export function torus(row, column, irad, orad, color) {
     return { p: pos, n: nor, c: col, t: st, i: idx };
 }
 
-export function sphere(row, column, rad, color) {
+export function sphere(row: number, column: number, rad: number, color: number[]) {
     var pos = new Array(), nor = new Array(),
         col = new Array(), st = new Array(), idx = new Array();
     for (var i = 0; i <= row; i++) {

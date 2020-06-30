@@ -123,8 +123,8 @@ const func = () => {
     mat.multiply(tmpMatrix, mMatrix, mvpMatrix);
     gl.uniformMatrix4fv(uniLocation[0], false, mvpMatrix);
     gl.uniform1f(uniLocation[1], size);
-    gl.uniform1f(uniLocation[2], 0);
-    gl.uniform1f(uniLocation[3], 1);
+    gl.uniform1i(uniLocation[2], 0);
+    gl.uniform1i(uniLocation[3], 1);
     gl.drawArrays(gl.POINTS, 0, sphere.p.length / 3);
 
     let lineOption: number = 0;
@@ -161,7 +161,7 @@ function create_texture(source: string, number: number) {
         gl.bindTexture(gl.TEXTURE_2D, tex)
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img)
         gl.generateMipmap(gl.TEXTURE_2D)
-        gl.bindTexture(gl.TEXTURE2, null)
+        gl.bindTexture(gl.TEXTURE_2D, null)
 
         switch (number) {
             case 0:

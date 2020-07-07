@@ -15,7 +15,7 @@ export function createShader(
     const shader: WebGLShader = gl.createShader(glType)
     gl.shaderSource(shader, shaderText)
     gl.compileShader(shader)
-    return gl.getShaderParameter(shader, gl.COMPILE_STATUS) ? shader : alert(gl.getShaderInfoLog(shader))
+    return gl.getShaderParameter(shader, gl.COMPILE_STATUS) ? shader : alert(gl.getShaderInfoLog(shader) + "\n" + shaderText)
 }
 
 export function createProgram(gl: WebGLRenderingContext): WebGLProgram | void {

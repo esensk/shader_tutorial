@@ -108,9 +108,48 @@ export function setVboAttribute(gl: WebGLRenderingContext, program: WebGLProgram
     gl.vertexAttribPointer(location, stride, gl.FLOAT, false, 0, 0)
 }
 
+export function setVboAttributePosition(gl: WebGLRenderingContext, program: WebGLProgram, data: number[]): void {
+    setVboAttribute(gl, program, data, "position", 3)
+}
+
+export function setVboAttributeColor(gl: WebGLRenderingContext, program: WebGLProgram, data: number[]): void {
+    setVboAttribute(gl, program, data, "color", 4)
+}
+
+export function setVboAttributeTextureCoord(gl: WebGLRenderingContext, program: WebGLProgram, data: number[]): void {
+    setVboAttribute(gl, program, data, "textureCoord", 2)
+}
+
+export function setVboAttributeNormal(gl: WebGLRenderingContext, program: WebGLProgram, data: number[]): void {
+    setVboAttribute(gl, program, data, "normal", 3)
+}
+
+
 export function bindIbo(gl: WebGLRenderingContext, indexes: number[]): void {
     const ibo: WebGLBuffer = createIbo(gl, indexes)
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo)
+}
+
+export function createFrameBuffer(gl: WebGLRenderingContext, width: number, height: number) {
+    const buffer = gl.createFramebuffer()
+    gl.bindFramebuffer(gl.FRAMEBUFFER, buffer)
+
+    const depthBuffer = gl.createRenderbuffer()
+    gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer)
+    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height)
+    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthBuffer)
+
+    const texture: WebGLTexture = gl.createTexture()
+    gl.bindTexture(gl.TEXTURE_2D, texture)
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null)
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0)
+    gl.bindTexture(gl.TEXTURE_2D, null)
+    gl.bindRenderbuffer(gl.RENDERBUFFER, null)
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+
+    return { f: buffer, d: depthBuffer, t: texture }
 }
 
 export function torus(row, column, irad, orad, color) {

@@ -72,7 +72,7 @@ gl.enable(gl.DEPTH_TEST)
 gl.depthFunc(gl.LEQUAL)
 
 let normalTex: WebGLTexture = null
-createTexture("../src/texture/texture8.png", 0)
+createTexture("../src/texture/texture8.png")
 
 let cubeTex: WebGLTexture = null
 const cubeSource: string[] = new Array(

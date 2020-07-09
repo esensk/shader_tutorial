@@ -152,6 +152,34 @@ export function createFrameBuffer(gl: WebGLRenderingContext, width: number, heig
     return { f: buffer, d: depthBuffer, t: texture }
 }
 
+export function createFrameBufferForCubeMap(gl: WebGLRenderingContext, width: number, height: number, targets: number[]) {
+    const buffer = gl.createFramebuffer()
+    gl.bindFramebuffer(gl.FRAMEBUFFER, buffer)
+
+    const depthBuffer = gl.createRenderbuffer()
+    gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer)
+    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height)
+    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthBuffer)
+
+    const texture: WebGLTexture = gl.createTexture()
+    gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture)
+
+    for (let idx = 0; idx < targets.length; ++idx) {
+        gl.texImage2D(targets[idx], 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null)
+    }
+
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+    gl.bindTexture(gl.TEXTURE_CUBE_MAP, null)
+    gl.bindRenderbuffer(gl.RENDERBUFFER, null)
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+
+    return { f: buffer, d: depthBuffer, t: texture }
+}
+
 export function torus(row, column, irad, orad, color) {
     var pos = new Array(), nor = new Array(),
         col = new Array(), st = new Array(), idx = new Array();

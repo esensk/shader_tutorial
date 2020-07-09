@@ -126,6 +126,7 @@ const func = () => {
     util.setVboAttributePosition(gl, program, cube.p)
     util.setVboAttributeNormal(gl, program, cube.n)
     util.setVboAttributeColor(gl, program, cube.c)
+    util.setVboAttributeTextureCoord(gl, program, cube.t)
     util.bindIbo(gl, cube.i)
 
     mat.identity(mMatrix)
@@ -140,6 +141,7 @@ const func = () => {
     util.setVboAttributePosition(gl, program, sphere.p)
     util.setVboAttributeNormal(gl, program, sphere.n)
     util.setVboAttributeColor(gl, program, sphere.c)
+    util.setVboAttributeTextureCoord(gl, program, sphere.t)
     util.bindIbo(gl, sphere.i)
 
     mat.identity(mMatrix)
@@ -156,6 +158,7 @@ const func = () => {
     util.setVboAttributePosition(gl, program, torus.p)
     util.setVboAttributeNormal(gl, program, torus.n)
     util.setVboAttributeColor(gl, program, torus.c)
+    util.setVboAttributeTextureCoord(gl, program, torus.t)
     util.bindIbo(gl, torus.i)
 
     mat.identity(mMatrix)

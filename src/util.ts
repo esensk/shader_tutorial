@@ -124,7 +124,6 @@ export function setVboAttributeNormal(gl: WebGLRenderingContext, program: WebGLP
     setVboAttribute(gl, program, data, "normal", 3)
 }
 
-
 export function bindIbo(gl: WebGLRenderingContext, indexes: number[]): void {
     const ibo: WebGLBuffer = createIbo(gl, indexes)
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo)

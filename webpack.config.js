@@ -3,7 +3,7 @@ const path = require('path')
 module.exports = {
     mode: 'development',
     devtool: 'inline-source-map',
-    entry: path.join(__dirname, 'src/multi_texture/main.ts'),
+    entry: path.join(__dirname, 'src/projection/main.ts'),
     output: {
         filename: 'bundle.js',
         path: path.join(__dirname, 'public')

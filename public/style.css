@@ -1,0 +1,12 @@
+p {
+    margin: 10px 0px 3px;
+}
+em {
+    color: navy;
+    font-size: 10pt;
+    font-weight: bold;
+}
+div {
+    margin: 0px 10pc;
+    padding: 10px 0px;
+}

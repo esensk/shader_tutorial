@@ -3,17 +3,218 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link type="text/css" rel="stylesheet" href="style.css" />
     </head>
     <body>
-        <canvas id="canvas"></canvas>
-        <p><input id="cull" type="checkbox" />enable culling</p>
-        <p><input id="front" type="checkbox" />frontface (check -&gt; CCW)</p>
-        <p><input id="depth" type="checkbox" />enable depth test</p>
-        <p>
-            <input id="transparency" name="blend" type="radio" checked />transparency
-            <input id="add" name="blend" type="radio" />add
-        </p>
-        <p><input id="range" type="range" min="0" max="100" value="70" />vertex alpha value (0% - 100%)</p>
+        <div style="float: left;">
+            <canvas id="canvas"></canvas>
+            <p><input id="blur" type="checkbox" />blur filter</p>
+            <p><input id="range" type="range" value="50" max="100" min="0" />refractive index</p>
+            <p><input id="check" type="checkbox" checked />billboard</p>
+            <p><input id="point_size" type="range" value="10" min="10" max="100" />point size</p>
+            <p><input id="lines" type="radio" name="line" checked />gl.LINES</p>
+            <p><input id="line_strip" type="radio" name="line" />gl.LINE_STRIT</p>
+            <p><input id="line_loop" type="radio" name="line" />gl.LINE_LOOP</p>
+        </div>
+        <div style="float: left; color: gray; font-size: 8pt; font-family: consolas;">
+            <div style="width: 100%; border-bottom: 1px solid silver;">
+                <p><em>context clear color</em></p>
+                <p>
+                    red <input id="rangeBgRed" type="range" min="0" max="100" value="0" /> green
+                    <input id="rangeBgGreen" type="range" min="0" max="100" value="70" /> blue
+                    <input id="rangeBgBlue" type="range" min="0" max="100" value="70" /> alpha
+                    <input id="rangeBgAlpha" type="range" min="0" max="100" value="100" />
+                </p>
+                <p><em>blend constant color</em></p>
+                <p>
+                    red <input id="rangeBcRed" type="range" min="0" max="100" value="0" /> green
+                    <input id="rangeBcGreen" type="range" min="0" max="100" value="0" /> blue
+                    <input id="rangeBcBlue" type="range" min="0" max="100" value="0" /> alpha
+                    <input id="rangeBcAlpha" type="range" min="0" max="100" value="100" />
+                </p>
+            </div>
+            <div style="float: left; width: 45%; border-right: 1px solid silver;">
+                <p><em>model 1</em></p>
+                <p><input id="m1Blend" type="checkbox" /> enable blend</p>
+                <p>
+                    vertex Alpha <input id="rangeM1VertexAlpha" type="range" min="0" max="100" value="100" /> (0% -
+                    100%)
+                </p>
+                <p><em>color equation</em></p>
+                <select id="m1cEquation">
+                    <option selected>gl.FUNC_ADD</option>
+                    <option>gl.FUNC_SUBTRACT</option>
+                    <option>gl.FUNC_REVERSE_SUBTRACT</option>
+                </select>
+                <p><em>alpha equation</em></p>
+                <select id="m1aEquation">
+                    <option selected>gl.FUNC_ADD</option>
+                    <option>gl.FUNC_SUBTRACT</option>
+                    <option>gl.FUNC_REVERSE_SUBTRACT</option>
+                </select>
+                <p><em>source color blend factor</em></p>
+                <select id="m1cSrcBlendFunc">
+                    <option>gl.ZERO</option>
+                    <option selected>gl.ONE</option>
+                    <option>gl.SRC_COLOR</option>
+                    <option>gl.DST_COLOR</option>
+                    <option>gl.ONE_MINUS_SRC_COLOR</option>
+                    <option>gl.ONE_MINUS_DST_COLOR</option>
+                    <option>gl.SRC_ALPHA</option>
+                    <option>gl.DST_ALPHA</option>
+                    <option>gl.ONE_MINUS_SRC_ALPHA</option>
+                    <option>gl.ONE_MINUS_DST_ALPHA</option>
+                    <option>gl.CONSTANT_COLOR</option>
+                    <option>gl.ONE_MINUS_CONSTANT_COLOR</option>
+                    <option>gl.CONSTANT_ALPHA</option>
+                    <option>gl.ONE_MINUS_CONSTANT_ALPHA</option>
+                    <option>gl.SRC_ALPHA_SATURATE</option>
+                </select>
+                <p><em>destination color blend factor</em></p>
+                <select id="m1cDstBlendFunc">
+                    <option selected>gl.ZERO</option>
+                    <option>gl.ONE</option>
+                    <option>gl.SRC_COLOR</option>
+                    <option>gl.DST_COLOR</option>
+                    <option>gl.ONE_MINUS_SRC_COLOR</option>
+                    <option>gl.ONE_MINUS_DST_COLOR</option>
+                    <option>gl.SRC_ALPHA</option>
+                    <option>gl.DST_ALPHA</option>
+                    <option>gl.ONE_MINUS_SRC_ALPHA</option>
+                    <option>gl.ONE_MINUS_DST_ALPHA</option>
+                    <option>gl.CONSTANT_COLOR</option>
+                    <option>gl.ONE_MINUS_CONSTANT_COLOR</option>
+                    <option>gl.CONSTANT_ALPHA</option>
+                    <option>gl.ONE_MINUS_CONSTANT_ALPHA</option>
+                </select>
+                <p><em>source alpha blend factor</em></p>
+                <select id="m1aSrcBlendFunc">
+                    <option>gl.ZERO</option>
+                    <option selected>gl.ONE</option>
+                    <option>gl.SRC_COLOR</option>
+                    <option>gl.DST_COLOR</option>
+                    <option>gl.ONE_MINUS_SRC_COLOR</option>
+                    <option>gl.ONE_MINUS_DST_COLOR</option>
+                    <option>gl.SRC_ALPHA</option>
+                    <option>gl.DST_ALPHA</option>
+                    <option>gl.ONE_MINUS_SRC_ALPHA</option>
+                    <option>gl.ONE_MINUS_DST_ALPHA</option>
+                    <option>gl.CONSTANT_COLOR</option>
+                    <option>gl.ONE_MINUS_CONSTANT_COLOR</option>
+                    <option>gl.CONSTANT_ALPHA</option>
+                    <option>gl.ONE_MINUS_CONSTANT_ALPHA</option>
+                    <option>gl.SRC_ALPHA_SATURATE</option>
+                </select>
+                <p><em>destination alpha blend factor</em></p>
+                <select id="m1aDstBlendFunc">
+                    <option selected>gl.ZERO</option>
+                    <option>gl.ONE</option>
+                    <option>gl.SRC_COLOR</option>
+                    <option>gl.DST_COLOR</option>
+                    <option>gl.ONE_MINUS_SRC_COLOR</option>
+                    <option>gl.ONE_MINUS_DST_COLOR</option>
+                    <option>gl.SRC_ALPHA</option>
+                    <option>gl.DST_ALPHA</option>
+                    <option>gl.ONE_MINUS_SRC_ALPHA</option>
+                    <option>gl.ONE_MINUS_DST_ALPHA</option>
+                    <option>gl.CONSTANT_COLOR</option>
+                    <option>gl.ONE_MINUS_CONSTANT_COLOR</option>
+                    <option>gl.CONSTANT_ALPHA</option>
+                    <option>gl.ONE_MINUS_CONSTANT_ALPHA</option>
+                </select>
+            </div>
+            <div style="float: left; width: 45%;">
+                <p><em>model 2</em></p>
+                <p><input id="m2Blend" type="checkbox" checked /> enable blend</p>
+                <p>
+                    vertex Alpha <input id="rangeM2VertexAlpha" type="range" min="0" max="100" value="50" /> (0% - 100%)
+                </p>
+                <p><em>color equation</em></p>
+                <select id="m2cEquation">
+                    <option selected>gl.FUNC_ADD</option>
+                    <option>gl.FUNC_SUBTRACT</option>
+                    <option>gl.FUNC_REVERSE_SUBTRACT</option>
+                </select>
+                <p><em>alpha equation</em></p>
+                <select id="m2aEquation">
+                    <option selected>gl.FUNC_ADD</option>
+                    <option>gl.FUNC_SUBTRACT</option>
+                    <option>gl.FUNC_REVERSE_SUBTRACT</option>
+                </select>
+                <p><em>source color blend factor</em></p>
+                <select id="m2cSrcBlendFunc">
+                    <option>gl.ZERO</option>
+                    <option>gl.ONE</option>
+                    <option>gl.SRC_COLOR</option>
+                    <option>gl.DST_COLOR</option>
+                    <option>gl.ONE_MINUS_SRC_COLOR</option>
+                    <option>gl.ONE_MINUS_DST_COLOR</option>
+                    <option selected>gl.SRC_ALPHA</option>
+                    <option>gl.DST_ALPHA</option>
+                    <option>gl.ONE_MINUS_SRC_ALPHA</option>
+                    <option>gl.ONE_MINUS_DST_ALPHA</option>
+                    <option>gl.CONSTANT_COLOR</option>
+                    <option>gl.ONE_MINUS_CONSTANT_COLOR</option>
+                    <option>gl.CONSTANT_ALPHA</option>
+                    <option>gl.ONE_MINUS_CONSTANT_ALPHA</option>
+                    <option>gl.SRC_ALPHA_SATURATE</option>
+                </select>
+                <p><em>destination color blend factor</em></p>
+                <select id="m2cDstBlendFunc">
+                    <option selected>gl.ZERO</option>
+                    <option>gl.ONE</option>
+                    <option>gl.SRC_COLOR</option>
+                    <option>gl.DST_COLOR</option>
+                    <option>gl.ONE_MINUS_SRC_COLOR</option>
+                    <option>gl.ONE_MINUS_DST_COLOR</option>
+                    <option>gl.SRC_ALPHA</option>
+                    <option>gl.DST_ALPHA</option>
+                    <option selected>gl.ONE_MINUS_SRC_ALPHA</option>
+                    <option>gl.ONE_MINUS_DST_ALPHA</option>
+                    <option>gl.CONSTANT_COLOR</option>
+                    <option>gl.ONE_MINUS_CONSTANT_COLOR</option>
+                    <option>gl.CONSTANT_ALPHA</option>
+                    <option>gl.ONE_MINUS_CONSTANT_ALPHA</option>
+                    <option>gl.SRC_ALPHA_SATURATE</option>
+                </select>
+                <p><em>source alpha blend factor</em></p>
+                <select id="m2aSrcBlendFunc">
+                    <option>gl.ZERO</option>
+                    <option selected>gl.ONE</option>
+                    <option>gl.SRC_COLOR</option>
+                    <option>gl.DST_COLOR</option>
+                    <option>gl.ONE_MINUS_SRC_COLOR</option>
+                    <option>gl.ONE_MINUS_DST_COLOR</option>
+                    <option>gl.SRC_ALPHA</option>
+                    <option>gl.DST_ALPHA</option>
+                    <option>gl.ONE_MINUS_SRC_ALPHA</option>
+                    <option>gl.ONE_MINUS_DST_ALPHA</option>
+                    <option>gl.CONSTANT_COLOR</option>
+                    <option>gl.ONE_MINUS_CONSTANT_COLOR</option>
+                    <option>gl.CONSTANT_ALPHA</option>
+                    <option>gl.ONE_MINUS_CONSTANT_ALPHA</option>
+                    <option>gl.SRC_ALPHA_SATURATE</option>
+                </select>
+                <p><em>destination alpha blend factor</em></p>
+                <select id="m2aDstBlendFunc">
+                    <option>gl.ZERO</option>
+                    <option selected>gl.ONE</option>
+                    <option>gl.SRC_COLOR</option>
+                    <option>gl.DST_COLOR</option>
+                    <option>gl.ONE_MINUS_SRC_COLOR</option>
+                    <option>gl.ONE_MINUS_DST_COLOR</option>
+                    <option>gl.SRC_ALPHA</option>
+                    <option>gl.DST_ALPHA</option>
+                    <option>gl.ONE_MINUS_SRC_ALPHA</option>
+                    <option>gl.ONE_MINUS_DST_ALPHA</option>
+                    <option>gl.CONSTANT_COLOR</option>
+                    <option>gl.ONE_MINUS_CONSTANT_COLOR</option>
+                    <option>gl.CONSTANT_ALPHA</option>
+                    <option>gl.ONE_MINUS_CONSTANT_ALPHA</option>
+                    <option>gl.SRC_ALPHA_SATURATE</option>
+                </select>
+            </div>
+        </div>
         <script src="bundle.js"></script>
     </body>
 </html>

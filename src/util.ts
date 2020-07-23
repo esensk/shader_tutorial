@@ -15,7 +15,7 @@ export function createShader(
     const shader: WebGLShader = gl.createShader(glType)
     gl.shaderSource(shader, shaderText)
     gl.compileShader(shader)
-    return gl.getShaderParameter(shader, gl.COMPILE_STATUS) ? shader : alert(gl.getShaderInfoLog(shader))
+    return gl.getShaderParameter(shader, gl.COMPILE_STATUS) ? shader : alert(gl.getShaderInfoLog(shader) + "\n" + shaderText)
 }
 
 export function createProgram(gl: WebGLRenderingContext): WebGLProgram | void {
@@ -108,7 +108,214 @@ export function setVboAttribute(gl: WebGLRenderingContext, program: WebGLProgram
     gl.vertexAttribPointer(location, stride, gl.FLOAT, false, 0, 0)
 }
 
+export function setVboAttributePosition(gl: WebGLRenderingContext, program: WebGLProgram, data: number[]): void {
+    setVboAttribute(gl, program, data, "position", 3)
+}
+
+export function setVboAttributeColor(gl: WebGLRenderingContext, program: WebGLProgram, data: number[]): void {
+    setVboAttribute(gl, program, data, "color", 4)
+}
+
+export function setVboAttributeTextureCoord(gl: WebGLRenderingContext, program: WebGLProgram, data: number[]): void {
+    setVboAttribute(gl, program, data, "textureCoord", 2)
+}
+
+export function setVboAttributeNormal(gl: WebGLRenderingContext, program: WebGLProgram, data: number[]): void {
+    setVboAttribute(gl, program, data, "normal", 3)
+}
+
 export function bindIbo(gl: WebGLRenderingContext, indexes: number[]): void {
     const ibo: WebGLBuffer = createIbo(gl, indexes)
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo)
+}
+
+export function createFrameBuffer(gl: WebGLRenderingContext, width: number, height: number) {
+    const buffer = gl.createFramebuffer()
+    gl.bindFramebuffer(gl.FRAMEBUFFER, buffer)
+
+    const depthBuffer = gl.createRenderbuffer()
+    gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer)
+    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height)
+    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthBuffer)
+
+    const texture: WebGLTexture = gl.createTexture()
+    gl.bindTexture(gl.TEXTURE_2D, texture)
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null)
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0)
+    gl.bindTexture(gl.TEXTURE_2D, null)
+    gl.bindRenderbuffer(gl.RENDERBUFFER, null)
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+
+    return { f: buffer, d: depthBuffer, t: texture }
+}
+
+export function createFrameBufferForCubeMap(gl: WebGLRenderingContext, width: number, height: number, targets: number[]) {
+    const buffer = gl.createFramebuffer()
+    gl.bindFramebuffer(gl.FRAMEBUFFER, buffer)
+
+    const depthBuffer = gl.createRenderbuffer()
+    gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer)
+    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height)
+    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthBuffer)
+
+    const texture: WebGLTexture = gl.createTexture()
+    gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture)
+
+    for (let idx = 0; idx < targets.length; ++idx) {
+        gl.texImage2D(targets[idx], 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null)
+    }
+
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+    gl.bindTexture(gl.TEXTURE_CUBE_MAP, null)
+    gl.bindRenderbuffer(gl.RENDERBUFFER, null)
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+
+    return { f: buffer, d: depthBuffer, t: texture }
+}
+
+export function torus(row, column, irad, orad, color) {
+    var pos = new Array(), nor = new Array(),
+        col = new Array(), st = new Array(), idx = new Array();
+    for (var i = 0; i <= row; i++) {
+        var r = Math.PI * 2 / row * i;
+        var rr = Math.cos(r);
+        var ry = Math.sin(r);
+        for (var ii = 0; ii <= column; ii++) {
+            var tr = Math.PI * 2 / column * ii;
+            var tx = (rr * irad + orad) * Math.cos(tr);
+            var ty = ry * irad;
+            var tz = (rr * irad + orad) * Math.sin(tr);
+            var rx = rr * Math.cos(tr);
+            var rz = rr * Math.sin(tr);
+            if (color) {
+                var tc = color;
+            } else {
+                tc = hsva(360 / column * ii, 1, 1, 1);
+            }
+            var rs = 1 / column * ii;
+            var rt = 1 / row * i + 0.5;
+            if (rt > 1.0) { rt -= 1.0; }
+            rt = 1.0 - rt;
+            pos.push(tx, ty, tz);
+            nor.push(rx, ry, rz);
+            col.push(tc[0], tc[1], tc[2], tc[3]);
+            st.push(rs, rt);
+        }
+    }
+    for (i = 0; i < row; i++) {
+        for (ii = 0; ii < column; ii++) {
+            r = (column + 1) * i + ii;
+            idx.push(r, r + column + 1, r + 1);
+            idx.push(r + column + 1, r + column + 2, r + 1);
+        }
+    }
+    return { p: pos, n: nor, c: col, t: st, i: idx };
+}
+
+export function sphere(row: number, column: number, rad: number, color: number[]) {
+    var pos = new Array(), nor = new Array(),
+        col = new Array(), st = new Array(), idx = new Array();
+    for (var i = 0; i <= row; i++) {
+        var r = Math.PI / row * i;
+        var ry = Math.cos(r);
+        var rr = Math.sin(r);
+        for (var ii = 0; ii <= column; ii++) {
+            var tr = Math.PI * 2 / column * ii;
+            var tx = rr * rad * Math.cos(tr);
+            var ty = ry * rad;
+            var tz = rr * rad * Math.sin(tr);
+            var rx = rr * Math.cos(tr);
+            var rz = rr * Math.sin(tr);
+            if (color) {
+                var tc = color;
+            } else {
+                tc = hsva(360 / row * i, 1, 1, 1);
+            }
+            pos.push(tx, ty, tz);
+            nor.push(rx, ry, rz);
+            col.push(tc[0], tc[1], tc[2], tc[3]);
+            st.push(1 - 1 / column * ii, 1 / row * i);
+        }
+    }
+    r = 0;
+    for (i = 0; i < row; i++) {
+        for (ii = 0; ii < column; ii++) {
+            r = (column + 1) * i + ii;
+            idx.push(r, r + 1, r + column + 2);
+            idx.push(r, r + column + 2, r + column + 1);
+        }
+    }
+    return { p: pos, n: nor, c: col, t: st, i: idx };
+}
+
+export function cube(side, color) {
+    var hs = side * 0.5;
+    var pos = [
+        -hs, -hs, hs, hs, -hs, hs, hs, hs, hs, -hs, hs, hs,
+        -hs, -hs, -hs, -hs, hs, -hs, hs, hs, -hs, hs, -hs, -hs,
+        -hs, hs, -hs, -hs, hs, hs, hs, hs, hs, hs, hs, -hs,
+        -hs, -hs, -hs, hs, -hs, -hs, hs, -hs, hs, -hs, -hs, hs,
+        hs, -hs, -hs, hs, hs, -hs, hs, hs, hs, hs, -hs, hs,
+        -hs, -hs, -hs, -hs, -hs, hs, -hs, hs, hs, -hs, hs, -hs
+    ];
+    var nor = [
+        -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0, -1.0, 1.0, 1.0,
+        -1.0, -1.0, -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, -1.0, -1.0,
+        -1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0,
+        -1.0, -1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0, 1.0, -1.0, -1.0, 1.0,
+        1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0, -1.0, 1.0,
+        -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, -1.0
+    ];
+    var col = new Array();
+    for (var i = 0; i < pos.length / 3; i++) {
+        if (color) {
+            var tc = color;
+        } else {
+            tc = hsva(360 / pos.length / 3 * i, 1, 1, 1);
+        }
+        col.push(tc[0], tc[1], tc[2], tc[3]);
+    }
+    var st = [
+        0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+        0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+        0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+        0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+        0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+        0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0
+    ];
+    var idx = [
+        0, 1, 2, 0, 2, 3,
+        4, 5, 6, 4, 6, 7,
+        8, 9, 10, 8, 10, 11,
+        12, 13, 14, 12, 14, 15,
+        16, 17, 18, 16, 18, 19,
+        20, 21, 22, 20, 22, 23
+    ];
+    return { p: pos, n: nor, c: col, t: st, i: idx };
+}
+
+export function hsva(h, s, v, a) {
+    if (s > 1 || v > 1 || a > 1) { return; }
+    var th = h % 360;
+    var i = Math.floor(th / 60);
+    var f = th / 60 - i;
+    var m = v * (1 - s);
+    var n = v * (1 - s * f);
+    var k = v * (1 - s * (1 - f));
+    var color = new Array();
+    if (!(s > 0) && !(s < 0)) {
+        color.push(v, v, v, a);
+    } else {
+        var r = new Array(v, n, m, m, k, v);
+        var g = new Array(k, v, v, n, m, m);
+        var b = new Array(m, m, k, v, v, n);
+        color.push(r[i], g[i], b[i], a);
+    }
+    return color;
 }
